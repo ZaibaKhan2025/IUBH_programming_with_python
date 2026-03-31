@@ -1,11 +1,51 @@
+import mysql.connector
+import sys
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
 import mysql.connector
 from mysql.connector import Error
-import sys
 from bokeh.plotting import figure, show, output_file
 from bokeh.models import ColumnDataSource, HoverTool
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password=""
+)
+
+# Queries for database:
+
+mycursor = mydb.cursor()
+
+sql_queries = [
+    "DROP DATABASE IF EXISTS python_assignment_zaiba_khan",
+    "CREATE DATABASE python_assignment_zaiba_khan",
+    "CREATE TABLE train (id INT AUTO_INCREMENT PRIMARY KEY, x float, y1 float, y2 float, y3 float, y4 float)",
+    "CREATE TABLE test (id INT AUTO_INCREMENT PRIMARY KEY, x float, y float)",
+    "CREATE TABLE best_fit_func (id INT AUTO_INCREMENT PRIMARY KEY, x float, y float, choosen_func float)",
+    "CREATE TABLE ideal (id INT AUTO_INCREMENT PRIMARY KEY, x float)",
+    "CREATE TABLE mapping (id INT AUTO_INCREMENT PRIMARY KEY, x float, y float, ideal_x float, ideal_y float, deviation float)",
+    *[f"ALTER TABLE ideal ADD COLUMN y{i+1} float;" for i in range(0, 50)]
+]
+
+mycursor.execute(sql_queries[0])
+mycursor.execute(sql_queries[1])
+
+mydb_1 = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="python_assignment_zaiba_khan"
+)
+
+mycursor_1 = mydb_1.cursor()
+
+for i, table in enumerate(sql_queries):
+    if i > 1:
+        mycursor_1.execute(table)
+
+print("Database and Tables Created Successfully !")
+# Queries for database end:
 
 db_connection = mysql.connector.connect(
     host="localhost",
@@ -232,5 +272,3 @@ def plot_data_xtest_ytest(x,y):
     output_file("test.html")
     show(p)
 plot_data_xtest_ytest(x_test, y_test)
-
-print("XXXXXXXXXXXXXXXXXXXXXX")
